@@ -1,38 +1,82 @@
-# ZX Competition Visual
+# MAPPO 3D Battlefield Viewer
 
-“智信—2026”无人智能挑战赛三维实时可视化 Demo。
+基于原 ZX Competition Visual 的 Three.js 前端，增加一个面向 `fofe_info_mappo` 的三维战场态势可视化分支。
 
-当前 Demo：
-- 三个科目场景切换
-- 场景初始化
-- Agent 初始化（当前使用 Mock 数据，真实接口待对接）
-- 6 架无人机三维运动
-- 科目一目标动态出现
-- 科目二投送目标展示
-- 科目三抽象树林与感知障碍物展示
-- 播放 / 暂停 / 时间轴拖动 / 倍速回放
-- 轨迹显示与无人机状态面板
+> 重要：三维仅用于显示。强化学习环境仍然保持 4 km × 4 km 的二维物理空间，不增加高度状态，也不改变 MAPPO 的 observation/state/reward/dynamics。
+
+## 当前内容
+
+- 4 km × 4 km 战场映射到 Three.js 三维场景
+- 8 架异构 UAV：Stk / Rec / Com
+- 4 个移动目标
+- 3 个威胁区域
+- 2 个动态干扰区域
+- UAV 三维显示高度（仅渲染用途）
+- UAV 轨迹
+- 动态通信链路
+- 选中 UAV 的打击、侦察、通信范围
+- comm_quality / recon_quality 状态显示
+- 俯视 / 透视视角、时间轴、倍速回放
+- 显示层开关：轨迹、通信、威胁、干扰、范围
+
+## 数据结构
+
+当前：
+
+```
+Mock MAPPO World State
+        ↓
+src/worldState.js
+        ↓
+Three.js renderer
+```
+
+下一步将替换 Mock 数据源：
+
+```
+Python CooperativeUAVEnv
+        ↓
+WorldState snapshot / WebSocket
+        ↓
+Three.js renderer
+```
+
+渲染器只依赖统一 World State，不应读取强化学习环境的隐藏真值来影响策略。
+
+## 坐标约定
+
+RL 环境：
+
+```
+(x, y) ∈ [0, 4000] × [0, 4000] m
+```
+
+渲染：
+
+```
+RL x → Three.js X
+RL y → Three.js Z
+visual altitude → Three.js Y
+```
+
+其中 visual altitude 只改善三维展示，不进入强化学习状态。
 
 ## 本地运行
 
-要求：Node.js 18+（推荐 20 LTS）
+要求 Node.js 18+。
 
 ```bash
 npm install
 npm run dev
 ```
 
-然后浏览器打开 Vite 输出的本地地址，通常是：
+正式构建：
 
+```bash
+npm run build
 ```
-http://localhost:5173
-```
 
-## 当前数据架构
+## 分支
 
-当前：MockData -> World State -> Three.js
-
-后续联调目标：
-- MAVLink / ROS / WebSocket / 自定义协议
-- 统一转换为 AgentState / TargetState / ObstacleState
-- 可视化层保持不变
+- `main`：原“智信—2026”三维可视化 Demo
+- `mappo-3d-viewer`：MAPPO 战场三维可视化
